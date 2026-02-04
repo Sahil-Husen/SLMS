@@ -4,8 +4,10 @@ import User from "../models/User.js";
 // Create an admission application
 export const createAdmissionApplication = async (req, res) => {
     try {
+        console.log("started .....")
         const userId = req.user._id; // coming from auth middleware
         const { appliedProgram, preferredDepartment, course, marks } = req.body;
+        console.log("request ", req.body)
 
         // 1. Check if user exists (redundant but safe)
         const user = await User.findById(userId);

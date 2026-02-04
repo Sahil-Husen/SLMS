@@ -37,6 +37,8 @@ app.use("/api/admin", adminAuthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", facultyRoutes);
 app.use("/api/admin", departmentRoutes);
+
+// this api end point will provide all the admission
 app.use("/api/admissions", admissionRoutes);
 app.use("/api/attendance", attendanceRoutes);
 

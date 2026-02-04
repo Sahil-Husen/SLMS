@@ -26,7 +26,7 @@ const admissionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    status:  {
+    status: {
       type: String,
       enum: ["submitted", "evaluated", "selected", "rejected"],
       default: "submitted",

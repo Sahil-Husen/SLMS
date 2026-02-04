@@ -1,4 +1,4 @@
-import Attendance from "../models/Attendance.js";
+import Attendance from "../models/Attendence.js";
 import Student from "../models/Student.js";
 
 // Faculty: Create attendance for a course/date

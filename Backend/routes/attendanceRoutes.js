@@ -4,7 +4,7 @@ import {
     createAttendance,
     updateStudentAttendance,
     getMyAttendance,
-} from "../controllers/AttendanceController.js";
+} from "../controllers/attendanceController.js";
 
 const router = express.Router();
 

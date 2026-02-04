@@ -8,10 +8,35 @@ import mongoose from "mongoose";
 export const getAllAdmissions = async (req, res) => {
   const applications = await AdmissionApplication.find()
     .populate("userId", "name email")
-    .populate("preferredDepartment")
-    .populate("course");
+    .populate("preferredDepartment", "name")
+    .populate("course", "courseName totalSeats availableSeats");
 
-  res.json(applications);
+  const formatted = applications.map((app) => ({
+    applicationId: app._id,
+    student: {
+      id: app.userId?._id,
+      name: app.userId?.name,
+      email: app.userId?.email,
+    },
+    program: app.appliedProgram,
+    department: {
+      id: app.preferredDepartment?._id,
+      name: app.preferredDepartment?.name,
+    },
+    course: {
+      id: app.course?._id,
+      name: app.course?.courseName,
+    },
+    marks: app.marks,
+    meritRank: app.meritRank ?? null,
+    status: app.status,
+    appliedAt: app.createdAt,
+  }));
+
+  res.json({
+    total: formatted.length,
+    applications: formatted,
+  });
 };
 
 /* ===============================

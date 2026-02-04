@@ -23,7 +23,7 @@ export const validateAdmissions = async (req, res) => {
 export const generateMeritList = async (req, res) => {
   const { department } = req.query;
   
-  // ✅ ADD THIS
+  //  ADD THIS
   if (!department) {
     return res.status(400).json({ message: "department is required" });
   }
@@ -60,13 +60,13 @@ export const assignMeritRanks = async (req, res) => {
 export const selectStudents = async (req, res) => {
   const { department, seats } = req.body;
 
-  // 1️⃣ Get selected applications
+  // 1️ Get selected applications
   const selected = await AdmissionApplication.find({
     preferredDepartment: department,
     meritRank: { $lte: seats },
   });
 
-  // 2️⃣ Update admission application status
+  // 2️ Update admission application status
   await AdmissionApplication.updateMany(
     { _id: { $in: selected.map((s) => s._id) } },
     { $set: { status: "selected" } },
@@ -80,7 +80,7 @@ export const selectStudents = async (req, res) => {
     { $set: { status: "rejected" } },
   );
 
-  // 3️⃣ 🔥 UPDATE USER PROFILE (THIS IS THE PLACE)
+  // 3 UPDATE USER PROFILE (THIS IS THE PLACE)
   await User.updateMany(
     { _id: { $in: selected.map((s) => s.userId) } },
     { $set: { admissionStatus: "selected" } },

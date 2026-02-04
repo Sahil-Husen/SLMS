@@ -1,7 +1,7 @@
 import Faculty from "../models/Faculty.js";
 
 export const createFaculty = async (req, res) => {
-   
+ 
   
   const faculty = await Faculty.create({ name: req.body.name });
   res.status(201).json(faculty);

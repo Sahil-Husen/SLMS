@@ -1,44 +1,33 @@
 import Course from "../models/Course.js";
 
-
-
-
- 
-
 export const createCourse = async (req, res) => {
   try {
-    const {
-      courseCode,
-      courseName,
-      departmentId,
-      maxSeats
-    } = req.body;
+    const { courseCode, courseName, departmentId, program, maxSeats } =
+      req.body;
 
     const course = await Course.create({
       courseCode,
       courseName,
       departmentId,
+      program,
       maxSeats,
-      availableSeats: maxSeats
+      availableSeats: maxSeats,
     });
 
     return res.status(201).json(course);
   } catch (error) {
     return res.status(400).json({
       message: "Course creation failed",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
-
 
 //View Courses + Seats
 export const getCourses = async (req, res) => {
   const courses = await Course.find().populate("department", "name");
   res.json(courses);
 };
-
 
 //Update Seats (if admin revises intake)
 export const updateCourseSeats = async (req, res) => {
@@ -54,10 +43,9 @@ export const updateCourseSeats = async (req, res) => {
   res.json(course);
 };
 
-
 export const getCoursesByDepartment = async (req, res) => {
   const courses = await Course.find({
-    departmentId: req.params.departmentId
+    departmentId: req.params.departmentId,
   });
   res.json(courses);
 };

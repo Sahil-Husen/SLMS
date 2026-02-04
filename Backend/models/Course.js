@@ -5,7 +5,6 @@ const courseSchema = new mongoose.Schema(
     courseCode: {
       type: String,
       required: true,
-      unique: true,
       uppercase: true,
       trim: true,
     },
@@ -25,6 +24,7 @@ const courseSchema = new mongoose.Schema(
     facultyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Faculty",
+      default: null,
     },
 
     maxSeats: {
@@ -35,7 +35,6 @@ const courseSchema = new mongoose.Schema(
 
     availableSeats: {
       type: Number,
-      required: true,
       min: 0,
       validate: {
         validator: function (value) {
@@ -59,26 +58,20 @@ const courseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Compound index for unique course per department
+// 🔒 Unique course code per department
 courseSchema.index({ courseCode: 1, departmentId: 1 }, { unique: true });
 
-// Index for frequently queried fields
+// ⚡ Performance indexes
 courseSchema.index({ departmentId: 1 });
-courseSchema.index({ isActive: 1 });
 courseSchema.index({ program: 1 });
+courseSchema.index({ isActive: 1 });
 
-// Pre-save hook to validate available seats
-courseSchema.pre("save", function (next) {
-  if (this.availableSeats > this.maxSeats) {
-    next(new Error("Available seats cannot exceed max seats"));
-  }
-
-  // Set availableSeats to maxSeats on creation if not provided
+// 🎯 Auto-set availableSeats on creation
+courseSchema.pre("save", async function () {
   if (this.isNew && this.availableSeats === undefined) {
     this.availableSeats = this.maxSeats;
   }
-
-  next();
 });
+
 
 export default mongoose.model("Course", courseSchema);

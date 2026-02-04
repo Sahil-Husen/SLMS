@@ -5,7 +5,7 @@ import {
   assignMeritRanks,
   selectStudents,
   getSelectedStudents,
-  generateMeritList,
+  getGroupedMeritList
 } from "../controllers/adminControllerAllAdmission.js";
 
 import {
@@ -27,7 +27,7 @@ router.get("/admissions", auth(["admin"]), getAllAdmissions);
 //Validating the admissions
 router.get("/admissions/validate", auth(["admin"]), validateAdmissions);
 //Generate Merit list
-router.get("/merit-list", auth(["admin"]), generateMeritList);
+router.get("/merit-list", auth(["admin"]), getGroupedMeritList);
 
 //Select students based on cutoff
 router.post("/select-students", auth(["admin"]), selectStudents);

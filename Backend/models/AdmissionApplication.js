@@ -26,6 +26,10 @@ const admissionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    meritRank: {
+      // ADD THIS FIELD
+      type: Number,
+    },
     status: {
       type: String,
       enum: ["submitted", "evaluated", "selected", "rejected"],

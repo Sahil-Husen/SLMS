@@ -9,7 +9,7 @@ export const createAdmissionApplication = async (req, res) => {
         console.log("Started creating admission application...");
         const userId = req.user._id;
         const { appliedProgram, course, marks } = req.body;
-        console.log("Request body:", req.body);
+        
 
         // 1. Validate required fields
         if (!appliedProgram || !course || !marks) {

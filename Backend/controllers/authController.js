@@ -1,12 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-<<<<<<< HEAD
-import AdmissionApplication from "../models/AdmissionApplication.js";
- 
-=======
->>>>>>> decf96ee954c6fac2eb37351854b07f0459ffd59
 
+// User signup
 export const signupStudent = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -42,10 +38,7 @@ export const signupStudent = async (req, res) => {
 };
 
 
-
-
-
-
+// User login
 export const login = async (req, res) => {
   const { email, password } = req.body;
 

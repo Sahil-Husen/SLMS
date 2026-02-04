@@ -43,9 +43,3 @@ export const updateCourseSeats = async (req, res) => {
   res.json(course);
 };
 
-export const getCoursesByDepartment = async (req, res) => {
-  const courses = await Course.find({
-    departmentId: req.params.departmentId,
-  });
-  res.json(courses);
-};

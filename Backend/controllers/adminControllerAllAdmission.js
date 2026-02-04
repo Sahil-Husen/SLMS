@@ -1,7 +1,7 @@
 import AdmissionApplication from "../models/AdmissionApplication.js";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
-
+import mongoose from "mongoose";
 /* ===============================
    GET ALL APPLICATIONS
 ================================ */
@@ -78,66 +78,126 @@ export const getGroupedMeritList = async (req, res) => {
    ASSIGN MERIT RANKS (COURSE-WISE)
 ================================ */
 export const assignMeritRanks = async (req, res) => {
-  const { courseId } = req.body;
+  try {
+    const { courseId } = req.body;
 
-  const applications = await AdmissionApplication.find({
-    course: courseId,
-    status: "pending",
-  }).sort({ marks: -1, createdAt: 1 });
+    if (!courseId) {
+      return res.status(400).json({ message: "courseId is required" });
+    }
 
-  for (let i = 0; i < applications.length; i++) {
-    applications[i].meritRank = i + 1;
-    await applications[i].save();
+    const applications = await AdmissionApplication.find({
+      course: courseId,
+      status: "pending",
+    })
+      .sort({ marks: -1, createdAt: 1 })
+      .select("_id marks");
+
+    if (applications.length === 0) {
+      return res.json({ message: "No pending applications found" });
+    }
+
+    const bulkOps = applications.map((app, index) => ({
+      updateOne: {
+        filter: { _id: app._id },
+        update: { $set: { meritRank: index + 1 } },
+      },
+    }));
+
+    await AdmissionApplication.bulkWrite(bulkOps);
+
+    res.json({
+      message: "Merit ranks assigned course-wise",
+      total: applications.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
-
-  res.json({ message: "Merit ranks assigned course-wise" });
 };
 
 /* ===============================
    SELECT STUDENTS (COURSE-WISE)
 ================================ */
+
 export const selectStudents = async (req, res) => {
-  const { courseId } = req.body;
+  try {
+    const { courseId } = req.body;
 
-  const course = await Course.findById(courseId);
-  if (!course) {
-    return res.status(404).json({ message: "Course not found" });
-  }
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({
+        message: "Invalid courseId. Use course _id, not courseCode.",
+      });
+    }
 
-  const seats = course.availableSeats;
+    // 1. कोर्स ढूँढें और चेक करें कि सीटें बची हैं या नहीं
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-  const selected = await AdmissionApplication.find({
-    course: courseId,
-    meritRank: { $lte: seats },
-  });
+    if (course.availableSeats <= 0) {
+      return res
+        .status(400)
+        .json({ message: "No seats available in this course" });
+    }
 
-  await AdmissionApplication.updateMany(
-    { _id: { $in: selected.map((s) => s._id) } },
-    { $set: { status: "selected" } },
-  );
+    const seats = course.availableSeats;
 
-  await AdmissionApplication.updateMany(
-    {
+    // 2. सिर्फ उन छात्रों को ढूँढें जो 'submitted' हैं और जिनका meritRank सीटों के अंदर है
+    // meritRank: { $gt: 0 } यह सुनिश्चित करता है कि रैंक असाइन हो चुकी है
+    const selected = await AdmissionApplication.find({
       course: courseId,
-      meritRank: { $gt: seats },
-    },
-    { $set: { status: "rejected" } },
-  );
+      status: "submitted",
+      meritRank: { $lte: seats, $gt: 0 },
+    });
 
-  // 🔒 Update course seats
-  course.availableSeats -= selected.length;
-  await course.save();
+    if (selected.length === 0) {
+      return res.status(400).json({
+        message:
+          "No eligible students found. Ensure merit ranks are assigned first.",
+      });
+    }
 
-  // 🔒 Update user profiles
-  await User.updateMany(
-    { _id: { $in: selected.map((s) => s.userId) } },
-    { $set: { admissionStatus: "selected" } },
-  );
+    const selectedIds = selected.map((s) => s._id);
+    const userIds = selected.map((s) => s.userId);
 
-  res.json({
-    selectedCount: selected.length,
-    message: "Students selected successfully",
-  });
+    // 3. अपडेट स्टेटस: Selected
+    await AdmissionApplication.updateMany(
+      { _id: { $in: selectedIds } },
+      { $set: { status: "selected" } },
+    );
+
+    // 4. अपडेट स्टेटस: Rejected (बाकी बचे हुए छात्र जो मेरिट से बाहर हैं)
+    await AdmissionApplication.updateMany(
+      {
+        course: courseId,
+        status: "submitted", // सिर्फ उन्हें जो अभी तक पेंडिंग थे
+        meritRank: { $gt: seats },
+      },
+      { $set: { status: "rejected" } },
+    );
+
+    // 5. कोर्स की सीटें कम करें
+    course.availableSeats -= selected.length;
+    await course.save();
+
+    // 6. यूजर प्रोफाइल अपडेट करें
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      { $set: { admissionStatus: "selected" } },
+    );
+
+    res.json({
+      selectedCount: selected.length,
+      availableSeatsRemaining: course.availableSeats,
+      message: "Selection process completed successfully",
+    });
+  } catch (error) {
+    console.error("Selection Error:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
 };
 
 /* ===============================

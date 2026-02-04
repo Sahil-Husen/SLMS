@@ -5,14 +5,15 @@ import {
   assignMeritRanks,
   selectStudents,
   getSelectedStudents,
-  getGroupedMeritList
+  getGroupedMeritList,
+  
 } from "../controllers/adminControllerAllAdmission.js";
 
 import {
   createCourse,
   updateCourseSeats,
   getCourses,
-  getCoursesByDepartment,
+ 
 } from "../controllers/adminCourseAndSeat.js";
 
 import { auth } from "../middleware/authMiddleware.js";
@@ -29,6 +30,9 @@ router.get("/admissions/validate", auth(["admin"]), validateAdmissions);
 //Generate Merit list
 router.get("/merit-list", auth(["admin"]), getGroupedMeritList);
 
+// Assign merit Rank
+router.post("/assign-ranks",assignMeritRanks)
+
 //Select students based on cutoff
 router.post("/select-students", auth(["admin"]), selectStudents);
 
@@ -36,11 +40,7 @@ router.post("/select-students", auth(["admin"]), selectStudents);
 router.get("/selected-students", auth(["admin"]), getSelectedStudents);
 
 // Get coursewise Departments
-router.get(
-  "/courses/department/:departmentId",
-  auth(["admin", "student"]),
-  getCoursesByDepartment,
-);
+ 
 
 
 

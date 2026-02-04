@@ -3,7 +3,7 @@ import { auth } from "../middleware/authMiddleware.js";
 import {
     createAdmissionApplication,
     getMyApplication,
-} from "../controllers/AdmissionApplicationController.js";
+} from "../controllers/AdmissionApplication.js";
 
 const router = express.Router();
 

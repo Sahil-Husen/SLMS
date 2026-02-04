@@ -10,6 +10,7 @@ import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import facultyRoutes from "./routes/facultyRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
 import admissionRoutes from "./routes/admissionRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 
 
-
+app.use(cors());
 
 // DB
 connectDB();
@@ -37,6 +38,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/admin", facultyRoutes);
 app.use("/api/admin", departmentRoutes);
 app.use("/api/admissions", admissionRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 //  HEALTH CHECK
 app.get("/", (req, res) => {

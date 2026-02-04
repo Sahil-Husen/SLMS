@@ -36,6 +36,7 @@ app.use("/api/admin", adminAuthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", facultyRoutes);
 app.use("/api/admin", departmentRoutes);
+app.use("/api/admissions", admissionRoutes);
 
 //  HEALTH CHECK
 app.get("/", (req, res) => {

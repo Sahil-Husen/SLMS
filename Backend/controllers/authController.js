@@ -50,45 +50,45 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    const student = await User.findOne({ email, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Student not selected yet
-    if (user.role === "student" && user.status === "applied") {
-      return res.status(403).json({
-        message: "Entrance application under review",
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "30m" }
+    const accessToken = jwt.sign(
+      { id: student._id, role: student.role },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "15m" }
     );
 
-    res.cookie("jwt", token, {
+    const refreshToken = jwt.sign(
+      { id: student._id, role: student.role },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 30 * 60 * 1000,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Login successful",
-      role: user.role,
-      status: user.status,
+    return res.status(200).json({
+      message: "Student login successful",
+      accessToken,
+      role: student.role,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Login failed",
+    return res.status(500).json({
+      message: "Student login failed",
       error: error.message,
     });
   }
 };
+

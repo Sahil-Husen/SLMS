@@ -53,21 +53,35 @@ export const adminLogin = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: admin._id, role: admin.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "15m" }
     );
 
-    res.status(200).json({
+    const refreshToken = jwt.sign(
+      { id: admin._id, role: admin.role },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // 🔥 important
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
       message: "Admin login successful",
-      token,
+      accessToken,
       role: admin.role,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Admin login failed",
       error: error.message,
     });
   }
 };
+

@@ -16,6 +16,12 @@ const admissionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
     },
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+    },
+
     marks: {
       type: Number,
       required: true,
@@ -26,7 +32,7 @@ const admissionSchema = new mongoose.Schema(
       default: "submitted",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("AdmissionApplication", admissionSchema);

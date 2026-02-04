@@ -1,46 +1,47 @@
 import express from "express";
 import dotenv from "dotenv";
-dotenv.config();
 import cookieParser from "cookie-parser";
-import cors from 'cors';
-import  connectDB from './config/db.js'
-import authRoutes from './routes/authRoutes.js'
-import adminRoutes from './routes/adminRoutes.js'
-import adminAuthRoute from "./routes/adminAuthRoutes.js"
+import cors from "cors";
 
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import adminAuthRoutes from "./routes/adminAuthRoutes.js";
+import facultyRoutes from "./routes/facultyRoutes.js";
+import departmentRoutes from "./routes/departmentRoutes.js";
 
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-app.use(express.json());
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", 
-//     credentials: true, 
-//   }),
-// );
-app.use(cookieParser());
+
+//  MIDDLEWARE (ORDER MATTERS)
+app.use(
+  express.json({
+    type: ["application/json", "application/vnd.api+json"],
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
+ 
 
+ 
 
+// DB
 connectDB();
 
-
-// Auth Routes integration
-app.use("/api/auth",authRoutes)
-
-//Admin Routes
-
-app.use("/api/admin",adminAuthRoute);
-
+//  ROUTES
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminAuthRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin", facultyRoutes);
+app.use("/api/admin", departmentRoutes);
 
-
-
+//  HEALTH CHECK
 app.get("/", (req, res) => {
-    res.json({
-      message: "hi from  server",
-    });
-  }).listen(PORT, () => {
-    console.log(`Server is running on ${PORT} `);
-  });
+  res.json({ message: "hi from server" });
+});
+
+//  START SERVER (VERY IMPORTANT)
+app.listen(PORT, () => {
+  console.log(`Server is running on ${PORT}`);
+});

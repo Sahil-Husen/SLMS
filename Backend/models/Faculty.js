@@ -2,8 +2,11 @@ import mongoose from "mongoose";
 
 const facultySchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    name: String,
+    name: {
+      type: String,
+      required: true,
+      unique: true, // e.g. Science, Engineering, Arts
+    },
   },
   { timestamps: true }
 );

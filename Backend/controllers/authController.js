@@ -1,12 +1,15 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+<<<<<<< HEAD
 import AdmissionApplication from "../models/AdmissionApplication.js";
  
+=======
+>>>>>>> decf96ee954c6fac2eb37351854b07f0459ffd59
 
 export const signupStudent = async (req, res) => {
   try {
-    const { name, email, password, appliedProgram, marks } = req.body;
+    const { name, email, password } = req.body;
 
     // 1. Check existing user
     const existingUser = await User.findOne({ email });
@@ -19,25 +22,16 @@ export const signupStudent = async (req, res) => {
     // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Create User (STUDENT)
+    // 3. Create User (STUDENT)x1
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role: "student",
-      status: "applied", // VERY IMPORTANT
-    });
-
-    // 4. Create Admission Application
-    await AdmissionApplication.create({
-      userId: user._id,
-      appliedProgram,
-      marks,
-      status: "submitted",
     });
 
     res.status(201).json({
-      message: "Signup successful. Entrance application submitted.",
+      message: "Signup successful.",
     });
   } catch (error) {
     res.status(500).json({

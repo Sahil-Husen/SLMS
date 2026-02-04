@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import AdmissionApplication from "../models/AdmissionApplication.js";
+ 
 
 export const signupStudent = async (req, res) => {
   try {
@@ -46,49 +47,40 @@ export const signupStudent = async (req, res) => {
   }
 };
 
+
+
+
+
+
 export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const student = await User.findOne({ email, role: "student" });
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
-    const isMatch = await bcrypt.compare(password, student.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
 
-    const accessToken = jwt.sign(
-      { id: student._id, role: student.role },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    const refreshToken = jwt.sign(
-      { id: student._id, role: student.role },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.status(200).json({
-      message: "Student login successful",
-      accessToken,
-      role: student.role,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Student login failed",
-      error: error.message,
+  // Student access control
+  if (user.role === "student" && user.status === "applied") {
+    return res.status(403).json({
+      message: "Admission under process. Limited access only.",
     });
   }
-};
 
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  res.json({
+    token,
+    role: user.role,
+    status: user.status,
+  });
+};

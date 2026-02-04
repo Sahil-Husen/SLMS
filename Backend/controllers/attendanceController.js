@@ -58,13 +58,14 @@ export const updateStudentAttendance = async (req, res) => {
 };
 
 // Student: View own attendance
+// Student: View own attendance
 export const getMyAttendance = async (req, res) => {
     try {
         // Find the Student document linked to the logged-in User
-        const student = await Student.findOne({ userId: req.user._id });
+        const student = await Student.findOne({ userId: req.user._id }); // Changed from req.user.userId
         if (!student) return res.status(404).json({ message: "Student profile not found" });
 
-        const studentId = student._id;
+        const studentId = student._id; // Fixed: was "const studentId = studentId;"
 
         const attendances = await Attendance.find({ "records.studentId": studentId })
             .populate("courseId", "name")

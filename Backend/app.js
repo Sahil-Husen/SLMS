@@ -9,6 +9,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import facultyRoutes from "./routes/facultyRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
+import admissionRoutes from "./routes/admissionRoutes.js";
 
 dotenv.config();
 
@@ -22,9 +23,9 @@ app.use(
   }),
 );
 app.use(express.urlencoded({ extended: true }));
- 
 
- 
+
+
 
 // DB
 connectDB();

@@ -1,7 +1,12 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+<<<<<<< HEAD
  
+=======
+
+// User signup
+>>>>>>> aa95d2776dfa3e37350b88d719418e0d6868a931
 export const signupStudent = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -37,10 +42,7 @@ export const signupStudent = async (req, res) => {
 };
 
 
-
-
-
-
+// User login
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
